@@ -1,1 +1,648 @@
+//11
+#include"pch.h"
+#include<iostream>
+#include<cmath>
+using namespace std;
 
+class N;
+class M
+{
+	int a, b;
+public:
+	M(int x, int y) { a = x; b = y; }
+	void Print() { cout << "a=" << a << '\t' << "b=" << b << endl; }
+	void Setab(N &); //
+};
+
+class N
+{
+	int c, d;
+public:
+	N(int x, int y) { c = x; d = y; }
+	void Print() { cout << "c=" << c << '\t' << "d=" << d << endl; }
+	friend void M::Setab(N &);
+};
+
+void M::Setab(N &obj)
+{
+	a = obj.c;
+	b = obj.d;
+}
+
+class Sample //不能在main函数里定义
+{
+private:
+	static int d;
+	int n;
+	static int sum;
+public:
+	Sample(int x) { n = x; }
+	void add() { sum += n; }
+	void disp() { cout << "n=" << n << ",sum=" << sum << endl; }
+
+};
+int Sample::d = 10; //不能在main函数里定义 若不初始化，值为0
+int Sample::sum = 0;
+
+class Sample1
+{
+	int a;
+	static int b;
+public:
+	static int c;
+	Sample1(int x) { a = x; b += x; }
+	static void disp(Sample1 s)
+	{
+		cout << "a=" << s.a << ",b=" << b << endl;
+	}
+};
+int Sample1::b = 10;
+int Sample1::c = 20;
+
+class Sample2
+{
+	int x, y;
+public:
+	Sample2(int a = 0, int b = 0) : x(a), y(b) { }
+	void Show() { cout << "x=" << x << ", y=" << y << "\n"; }
+	friend int main();
+};
+
+class Point
+{
+	int x, y;
+public:
+	Point(int a = 0, int b = 0) : x(a), y(b) { } //?
+	void Show() { cout << "Point(" << x << ',' << y << ")\n"; }
+	int Getx() { return x; }
+	int Gety() { return y; }
+	friend double dist(Point&, Point &);
+};
+
+double dist(Point &p1, Point &p2)
+{
+	return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+
+class B;
+class A
+{
+	int x;
+	void Disp() { cout << "x=" << x << endl; }
+	friend B;
+};
+
+class B
+{
+public:
+	void Set(int n)
+	{
+		A a;
+		a.x = n;
+		a.Disp();
+	}
+};
+
+class Point1
+{
+	int x, y;
+	const int color;
+public:
+	Point1(int a = 0, int b = 0, int c = 0): color(c)//color不能在构造函数体中初始化 //或写为Point1(int a = 0, int b = 0, int c = 0): x(a), y(b), color(c) { } c++所有类型变量都是对象
+	{
+		x = a;
+		y = b;
+	}
+	
+};
+
+class Point2
+{
+	int x;
+	const int y;
+public:
+	Point2(int a = 0, int b = 0) : x(a), y(b) { }
+	int fun()
+	{
+		x = 5;
+		//y = 6;//invalid
+		return x + y;
+	}
+	int fun() const
+	{
+		//x = 5;//invalid
+		//y = 6;//invalid
+		return x + y;
+	}
+};
+
+class Point3
+{
+	int x;
+	const int y;
+public:
+	Point3(int a = 0, int b = 0) : x(a), y(b) { }
+	int fun();
+	int fun() const;
+};
+
+int Point3::fun()
+{
+	return x + y;
+}
+
+int Point3::fun() const
+{
+	return x - y;
+}
+
+int main(void)
+{
+	//静态数据成员：该类所有对象该成员共用一个储存空间
+	//定义 类型说明符前加关键字static
+
+	//初始化：必须在类体外进行
+	
+	//使用
+	Sample a(2), b(3), c(5);
+	a.add(); a.disp();
+	b.add(); b.disp();
+	c.add(); c.disp();
+
+	cout << "sizeof(a) :" << sizeof(a) << endl; //静态成员属于类，其长度不算入对象的长度
+	cout << "sizeof(b) :" << sizeof(b) << endl;
+	cout << "sizeof(c) :" << sizeof(c) << endl;
+
+	//静态成员函数 属于类 函数头前加static
+	//c++允许通过对象名调用公有静态成员函数
+	/*
+	静态数据成员： 
+	classname::membername
+	objectname.membername
+	静态成员函数
+	classname::functionname()
+	objectname.functionname()
+	*/
+
+	/*
+	在静态成员函数中，只能直接访问类的其他静态成员，不能直接访问类的非静态成员
+	如果想在静态成员函数中访问非静态成员，可通过参数对象来实现*/
+
+	Sample1 s1(2), s2(3);
+	Sample1::disp(s1);
+	Sample1::disp(s2);
+	cout << "c=" << Sample1::c << endl;
+
+	//友元函数
+	Point p1, p2(1, 1);
+	cout << dist(p1, p2) << endl;
+
+	//main()作为友元函数
+	Sample2 s(3, 6);
+	cout << "x=" << s.x << ", y=" << s.y << endl;
+	s.Show();
+
+	
+	//友元函数不是类的成员函数。因此对友元函数指定访问权限无效，可以把友元函数的说明放在private/public/protected任意段中
+
+	//一个类的成员函数作为另一个类的友元函数
+	M m(25, 40);
+	N n(55, 66);
+	cout << "m: "; m.Print();
+	cout << "n: "; n.Print();
+	m.Setab(n);
+	cout << "m: "; m.Print();
+
+	//友元类 当一个类作为另一个类的友元时，意味着这个类的所有成员函数都是另一个类的成员函数
+	B b1;
+	b1.Set(3);
+
+	//常数据成员 常成员函数→自动保护私有数据成员的机制
+	//const型对象→常对象
+
+	//常数据成员 值是常量，不能被修改
+	//常数据成员的初始化只能在类的构造函数的成员初始化列表中进行
+
+	//常成员函数 不能修改本类数据成员的值 只能读取类的数据成员（常数据成员、一般数据成员）的值
+	//一般成员函数（非const）也能读取类的所有成员的值，它虽然不能修改常数据成员的值，但它能修改除常数据成员以外其他数据成员的值
+	//const是函数类型的一部分，在声明和定义常成员函数时都要加上关键字const。const参与重载函数的区分，通过const关键字区分
+	//常对象只能调用常成员函数
+	Point3 p3(1, 8);
+	const Point3 p32(1, 8);
+	cout << p3.fun() << ','; //调用第一个fun()
+	cout << p32.fun() << endl; //调用第二个fun()
+
+	//常对象的值不能修改。若要修改常对象某个数据成员，可将数据成员定义为mutable类型
+	class Sample4
+	{
+		mutable int x;
+	public:
+		Sample4(int a = 0) : x(a) { }
+		void Set() const { x = 5; }
+	};
+
+	const Sample4 s4(8);
+	s4.Set();
+	
+	//常成员函数只能调用常成员函数，不能调用非const成员函数
+
+}
+
+//12
+#include"pch.h"
+#include<iostream>
+using namespace std;
+
+# define PI 3.14159
+class Point
+{
+	int x, y;
+public:
+	int z;
+	Point(int a = 0, int b = 0) :x(a), y(b) { }
+	int Getx() { return x; }
+	int Gety() { return y; }
+	void Setxy(int a, int b) { x = a, y = b; }
+	void ShowPoint() { cout << "Point:(" << x << ',' << y << ")\n"; }
+};
+
+class Point1
+{
+protected:
+	int x, y;
+public:
+	Point1(int a = 0, int b = 0) { x = a; y = b; }
+	int Getx() { return x; }
+	int Gety() { return y; }
+	void Setxy(int a, int b) { x = a, y = b; }
+	void ShowPoint() { cout << "Point:(" << x << ',' << y << ")\n"; }
+};
+
+class Radius1
+{
+protected:
+	int r;
+public:
+	Radius1(int ra = 0) { r = ra; }
+	void Setr(int ra) { r = ra; }
+	int Getr() { return r; }
+};
+
+class Circle : public Point
+{
+	int r;
+public:
+	Circle(int x, int y, int ra) : Point(x, y) //调用基类的构造函数，以初始化基类的x，y两个私有成员
+	{
+		r = ra;
+	}
+	void Setr(int ra) { r = ra; }
+	double Area() { return PI * r * r; }
+	void Move(int x_offset, int y_offset)
+	{
+		int x1 = Getx();
+		int y1 = Gety();
+		x1 += x_offset;
+		y1 += y_offset;
+		Setxy(x1, y1);
+
+	}
+	void ShowCircle()
+	{
+		ShowPoint();
+		cout << "Radius: " << r << '\t';
+		cout << "Area: " << Area() << endl;
+	}
+	friend void fun();
+};
+
+class Circle1 : public Point1, public Radius1
+{
+public:
+	Circle1(int x, int y, int ra) : Point1(x, y), Radius1(ra) { } //调用基类的构造函数，以初始化基类的x，y两个私有成员
+	double Area() { return PI * r * r; }
+	void Move(int x_offset, int y_offset)
+	{
+		x += x_offset;
+		y += y_offset;
+	}
+	void ShowCircle()
+	{
+		ShowPoint();
+		cout << "Radius: " << r << '\t';
+		cout << "Area: " << Area() << endl;
+	}
+};
+
+class Base1
+{
+protected:
+	int data1;
+public:
+	Base1(int a = 8)
+	{
+		data1 = a;
+		cout << data1 << ", Base1 Constructor_Base1\n";
+	}
+	~Base1() 
+	{
+		cout << data1 << ", Base1 Destructor_Base1\n";
+	}
+};
+
+class Base2
+{
+protected:
+	int data2;
+public:
+	Base2(int a = 9)
+	{
+		data2 = a;
+		cout << data2 << ", Base2 Constructor_Base2\n";
+	}
+	~Base2()
+	{
+		cout << data2 << ", Base2 Destructor_Base2\n";
+	}
+};
+
+class Derived : public Base1, public Base2
+{
+	int d;
+	Base1 b1, b2;
+public:
+	Derived(int x, int y, int z) : Base1(x), Base2(y), b1(x + y), b2(x + z) //调用基类构造函数的顺序不是冒号后书写顺序决定，而是A行的继承顺序决定
+	{
+		d = z;
+		cout << "Derived Constructor\n";
+	}
+	~Derived()
+	{
+		cout << "Derived Destructor\n";
+	}
+	void Show()
+	{
+		cout << data1 << ',' << data2 << ',' << d << endl;
+	}
+};
+
+void fun()
+{
+	Circle c(1, 1, 1);
+	c.z;
+}
+int main(void)
+{
+	//派生类有一个基类→单一继承 派生类有多个基类→多重继承
+
+	//单一继承
+	/*
+	定义派生类格式：
+	class <派生类名>: [<继承方式>] <基类名>
+	{
+		[[private:] //私有成员
+		...]
+		[public: //公有成员
+		...]
+		[protected: //保护成员
+		...]
+
+		继承方式：
+		public-公有继承（派生），private-私有继承（派生），protected-保护继承（派生）   
+		<继承方式>如果省略，表示私有继承
+	*/
+
+	//公有继承 继承所有成员 A中public和protected成员在B仍是，而A中private成员虽然被B继承，但在B类不可直接访问
+	class A
+	{
+		;
+	};
+	class B : public A
+	{
+		;
+	};
+	/*
+	无论何种继承方式，基类private成员在派生类均不可直接访问。
+	在公有继承派生类中，基类public成员和protected成员访问权限保持不变。
+	在私有继承派生类中，基类public成员和protected成员访问权限均变私有。
+	在保护继承派生类中，基类public成员变保护，protected不变。
+	对于任何继承方式，除了基类私有成员在派生类内不可直接访问，其他访问权限成员在派生类内均可直接访问。
+
+	只有公有继承的基类的公有成员在派生类外（如通过派生类对象）可直接访问，其他的任何继承方式下任何基类成员通过派生类对象都无法直接访问
+	*/
+
+	class A1
+	{
+	private:
+		int ax;
+	protected:
+		int ay;
+	public:
+		int az;
+		int f1() { ; };
+		int Getax() { return ax; }
+		void Setax(int x) { ax = x; }
+	};
+	class B1
+	{
+	private:
+		int bx;
+	protected:
+		int by;
+	public:
+		int bz;
+		void f2() { ; };
+		float f3() { ; };
+	};
+	//B类继承A类后，将A类的所有成员变为自己的成员，相当于在没有A类的情况下对B类作如下独立定义：
+	class B2
+	{
+	private: int ax; //虽然ax被继承下来，但如果要访问ax，需要通过A1类的公有成员函数接口。
+	private:
+		int bx;
+	protected:
+		int ay;
+		int by;
+	public:
+		int az;
+		int bz;
+		int f1() { ; };
+		int Getax() { return ax; }
+		void Setax(int x) { ax = x; }
+		void f2() { ; };
+		float f3() { ; };
+	};
+
+	//点类派生出圆类
+	Circle c(0, 0, 2);
+	c.ShowCircle();
+	c.Move(2, 2);
+	c.ShowCircle();
+	c.Setxy(0, 0);
+	c.Setr(1);
+	c.ShowCircle();
+
+	//私有继承
+	class A3
+	{
+	private:
+		int ax;
+	protected:
+		int ay;
+	public:
+		int az;
+		int f1() { ; };
+		int Getax() { return ax; }
+		void Setax(int x) { ax = x; }
+	};
+	class B3
+	{
+	private:
+		int bx;
+	protected:
+		int by;
+	public:
+		int bz;
+		void f2() { ; };
+		float f3() { ; };
+	};
+	//B类继承A类后，将A类的所有成员变为自己的成员，相当于在没有A类的情况下对B类作如下独立定义：
+	class B4
+	{
+	private: int ax; //虽然ax被继承下来，但如果要访问ax，需要通过A3类的公有成员函数接口。
+	private:
+		int bx;
+		int ay;
+		int az;
+		int f1() { ; };
+		int Getax() { return ax; }
+		void Setax(int x) { ax = x; }
+	protected:
+		int by;
+	public:
+		int bz;
+		void f2() { ; };
+		float f3() { ; };
+	};
+
+	//保护继承
+	//假装有代码 ////虽然ax被继承下来，但如果要访问ax，需要通过A4类的公有成员函数接口。
+
+	//private成员和protected成员的区别
+	/*
+	protected成员的优点：既能在本类实现数据隐藏，又能将类内直接访问特性传递到派生类中
+	private成员只能实现本类数据隐藏，不能将其类内直接访问特性传递到派生类中
+	一般来说，类的继承体系中，将类的数据成员访问权限定义为protected
+	*/
+
+	/*多重继承
+	class <派生类名>: <继承方式1> <基类名1>, <继承方式2> <基类名2>,... 
+	{
+		[[private:] //私有成员
+		...]
+		[public: //公有成员
+		...]
+		[protected: //保护成员
+		...]
+	*/
+
+	Circle1 c1(0, 0, 2);
+	c1.ShowCircle();
+	c1.Move(2, 2);
+	c1.ShowCircle();
+	c1.Setxy(0, 0);
+	c1.Setr(1);
+	c1.ShowCircle();
+
+	//基类成员初始化
+	//若一个类是由多个基类派生出来的，则在定义派生类构造函数时，需要调用基类的构造函数，初始化基类成员。
+	/*Classname::Classname(args) : Base(arg_1), Base(arg_2), ...,Basen(arg_n)
+	{ <派生类自身构造函数体> }*/
+	//派生类构造函数执行顺序：先依次调用基类构造函数Base(arg_1), Base(arg_2), ...,Basen(arg_n)，再执行派生类自身构造函数体
+	//析构函数执行顺序：首先执行派生类自身析构函数体，然后按~Basen(),...,~Base2(),~Base1()顺序调用基类析构函数，即析构函数执行顺序与构造函数相反
+
+	Derived cd(1, 2, 3);
+	cd.Show();
+
+	//若派生类中除了包含基类成员，还包含对象成员，则在派生类的构造函数初始化列表中不仅要列举基类的构造函数，也要列举对象成员的构造函数
+	//先调用基类的构造函数，再调用对象成员的构造函数，最后调用对象自身的构造函数。析构函数的调用顺序与构造函数相反。
+
+	//构造函数和析构函数的继承问题
+	//基类的构造函数和析构函数不会被派生类继承，而只能通过派生类的构造函数或析构函数自动调用，完成对基类数据成员的初始化或清理工作
+}
+
+//zy12_1
+#include"pch.h"
+#include<iostream>
+#include<cmath>
+using namespace std;
+
+//定义Point类
+class Point
+{
+protected:
+	double x1, y1;
+public:
+	Point(double a1 = 0, double b1 = 0)
+	{
+		x1 = a1;
+		y1 = b1;
+	}
+};
+
+//定义Line类
+class Line : public Point
+{
+protected:
+	double x2, y2;
+public:
+	Line(double a1, double b1, double a2 = 0, double b2 = 0) : Point(a1, b1)
+	{
+		x2 = a1;
+		y2 = b2;
+	}
+};
+
+//定义Triangle类
+class Triangle : public Line
+{
+protected:
+	double x3, y3;
+	double line1 = sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
+	double line2 = sqrt(pow(x2 - x3, 2) + pow(y2 - y3, 2));
+	double line3 = sqrt(pow(x1 - x3, 2) + pow(y1 - y3, 2));
+public:
+	Triangle(double a1, double b1, double a2, double b2, double a3 = 0, double b3 = 0) : Line(a1, b1, a2, b2), x3(a3), y3(b3)
+	{ }
+	void Show()
+	{
+		cout << "the vertex coordinates of the triangle is: \n";
+		cout << "(" << x1 << ',' << y1 << ")\n";
+		cout << "(" << x2 << ',' << y2 << ")\n";
+		cout << "(" << x3 << ',' << y3 << ")\n";
+	}
+	double Circumference()
+	{
+		return (line1 + line2 + line3);
+	}
+	double Area()
+	{
+		double p = (line1 + line2 + line3) / 2;
+
+		return sqrt(p * (p - line1) * (p - line2) * (p - line3));
+	}
+};
+
+int main(void)
+{
+	//定义Triangle类对象
+	Triangle t(6, 6, 6, 9, 10, 6);
+	
+	//调用成员函数输出顶点坐标、周长、面积
+	t.Show();
+	cout << "the circumference is: " << t.Circumference() << endl;
+	cout << "the area is: " << t.Area() << endl;
+
+	return 0;
+
+}
