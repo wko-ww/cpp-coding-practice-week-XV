@@ -646,3 +646,796 @@ int main(void)
 	return 0;
 
 }
+
+//大作业第三题
+#include"pch.h"
+#include<iostream>
+#include<fstream>
+#include<string.h>
+using namespace std;
+
+char entry_item[][15] = { "num", "name", "sex", "address", "tel", "email", "headship", "post", "total salary", "tax", "net payroll" };
+char entry_item_sex[][15] = { "M", "F" };
+char y_n[][15] = { "y" , "n" };
+int char_length[8] = { 20, 20, 10, 100, 20, 50, 20, 20 };
+
+void judge_str(char[], char[][15], int, char[]);
+bool judge_white_space(char[]);
+double judge_number(char[]);
+
+class Salary
+{
+	double Total;
+	double Tax;
+	double NetPayroll;
+public:
+	double GetTotal()
+	{
+		return Total;
+	}
+	double GetTax()
+	{
+		return Tax;
+	}
+	double GetNetPayroll()
+	{
+		return Total * Tax;
+	}
+	void SetTotal(double total)
+	{
+		Total = total;
+	}
+	void SetTax(double tax)
+	{
+		Tax = tax;
+	}
+	void SetNetPayroll(double netpayroll)
+	{
+		NetPayroll = netpayroll;
+	}
+	void SetDouble(char entry_item[], double data)
+	{
+		if (strcmp(entry_item, "total salary") == 0)
+			Total = data;
+		if (strcmp(entry_item, "tax") == 0)
+			Tax = data;
+		if (strcmp(entry_item, "net payroll") == 0)
+			NetPayroll = data;
+	}
+};
+
+class Member
+{
+	char Num[20] = "\0";
+	char Name[20];
+	char Sex[10];
+	char Address[100];
+	char Tel[20];
+	char Email[50];
+	char Headship[20];
+	char Post[20];
+	Salary StaffSalary;
+
+	char *member_char[8] = { Num, Name, Sex, Address, Tel, Email, Headship, Post };
+	double member_double[3] = { StaffSalary.GetTotal(), StaffSalary.GetTax(), StaffSalary.GetNetPayroll() };
+
+public:
+	void GetNum(char num[])
+	{
+		strcpy_s(num, 20, Num);
+	}
+	void GetName(char name[])
+	{
+		strcpy_s(name, 20, Name);
+	}
+	void GetSalary(double &total, double &tax, double &netpayroll)
+	{
+		total = StaffSalary.GetTotal();
+		tax = StaffSalary.GetTax();
+		netpayroll = StaffSalary.GetNetPayroll();
+	}
+	double GetNetPayroll()
+	{
+		return StaffSalary.GetNetPayroll();
+	}
+	void SetNum(char num[])
+	{
+		strcpy_s(Num, num);
+	}
+	void SetName(char name[])
+	{
+		strcpy_s(Name, name);
+	}
+	void SetSex(char sex[])
+	{
+		strcpy_s(Sex, sex);
+	}
+	void SetAddress(char address[])
+	{
+		strcpy_s(Address, address);
+	}
+	void SetTel(char tel[])
+	{
+		strcpy_s(Tel, tel);
+	}
+	void SetEmail(char email[])
+	{
+		strcpy_s(Email, email);
+	}
+	void SetHeadship(char headship[])
+	{
+		strcpy_s(Headship, headship);
+	}
+	void SetPost(char post[])
+	{
+		strcpy_s(Post, post);
+	}
+	void SetTotal(double total)
+	{
+		StaffSalary.SetTotal(total);
+	}
+	void SetTax(double tax)
+	{
+		StaffSalary.SetTax(tax);
+	}
+	void SetChar(int i, char item[])
+	{
+		switch (i)
+		{
+		case 0:
+			SetNum(item);
+			break;
+		case 1:
+			SetName(item);
+			break;
+		case 2:
+			SetSex(item);
+			break;
+		case 3:
+			SetAddress(item);
+			break;
+		case 4:
+			SetTel(item);
+			break;
+		case 5:
+			SetEmail(item);
+			break;
+		case 6:
+			SetHeadship(item);
+			break;
+		case 7:
+			SetPost(item);
+			break;
+		}
+	}
+
+	void Change()
+	{
+		cout << "input the entry you wanna change(num/name/sex/address/tel/email/headship/post/total salary/tax/net payroll) >> ";
+
+		char entry[100] = { '\0' };
+		char entry_[100] = { '\0' };
+		int length = (sizeof(entry_item) / sizeof(char)) / (sizeof(entry_item[0]) / sizeof(char));
+		judge_str(entry, entry_item, length, entry_);
+
+		cout << "input the new " << entry_ << " >> ";
+		char newdata[100] = { '\0' };// 1 judge_num
+		char newsex[100] = { '\0' };//2 judge_str  数组长度要100，否则异常，因为judge_str()很多数组长度是100
+		double newdata_i;
+
+		if (strcmp(entry_, "sex") != 0 && strcmp(entry_, "total salary") != 0 && strcmp(entry_, "tax") != 0 && strcmp(entry_, "net payroll") != 0)
+			cin.getline(newdata, 100);
+
+		if (strcmp(entry_, "sex") == 0)
+		{
+			int length = (sizeof(entry_item_sex) / sizeof(char)) / (sizeof(entry_item_sex[0]) / sizeof(char));//2 judge_str
+			judge_str(newsex, entry_item_sex, length, newdata); //11 简化change()
+		}
+
+		if (strcmp(entry_, "total salary") == 0 || strcmp(entry_, "tax") == 0 || strcmp(entry_, "net payroll") == 0)
+		{
+			newdata_i = judge_number(newdata);// 1 judge_num
+		}
+
+		for (int i = 0; i < 8; i++)
+		{
+			if (strcmp(entry_, entry_item[i]) == 0)
+					SetChar(i, newdata);
+		}
+
+		for (int i = 8; i < 10; i++)
+			if (strcmp(entry_, entry_item[i]) == 0)
+				StaffSalary.SetDouble(entry_item[i], newdata_i);
+
+		cout << "\nsuccessfully changed\n";
+	}
+
+	void Delete()
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			cout << "deleting " << entry_item[i] << endl;
+			char char_zero[2] = { '\0' };
+			SetChar(i, char_zero);
+			cout << "successfully deleted " << entry_item[i] << endl;
+		}
+
+		for (int i = 8; i <= 10; i++)
+		{
+			cout << "deleting " << entry_item[i] << endl;
+			StaffSalary.SetDouble(entry_item[i], 0);
+			cout << "successfully deleted " << entry_item[i] << endl;
+		}
+
+		cout << "\ndata successfully deleted!\n";
+	}
+
+	void Show()
+	{
+		cout << "num: " << Num << endl;
+		cout << "name: " << Name << endl;
+		cout << "sex: " << Sex << endl;
+		cout << "address: " << Address << endl;
+		cout << "tel: " << Tel << endl;
+		cout << "email: " << Email << endl;
+		cout << "headship: " << Headship << endl;
+		cout << "post: " << Post << endl;
+		cout << "total salary: " << StaffSalary.GetTotal() << endl;
+		cout << "tax: " << StaffSalary.GetTax() << endl;
+		cout << "net payroll: " << StaffSalary.GetNetPayroll() << endl;
+	}
+}member[100];
+
+int main(void)
+{
+
+	int add(char[], int);
+	int member_num = 0;
+
+	char info_txt[20] = "info.txt";
+	member_num = add(info_txt, member_num);
+
+	while (true)
+	{
+		int menu();
+		int function_num = menu();
+
+		switch (function_num)
+		{
+		case 1:
+		{ //避免由于……跳过
+			char entry_item_method[][15] = { "file", "typing" };//3 judge_str
+
+			cout << "input data by importing a file or typing? >> ";
+
+			char input_method[100] = { '\0' };//3 judge_str
+			char input_method_[100] = { '\0' };
+			int length = (sizeof(entry_item_method) / sizeof(char)) / (sizeof(entry_item_method[0]) / sizeof(char));
+			judge_str(input_method, entry_item_method, length, input_method_);
+
+			char str[50];
+			if (strcmp(input_method_, "file") == 0)
+			{
+				cout << "input the file name of whom you wanna import >> ";
+				cin >> str;
+				char ignore[100];
+				cin.getline(ignore, 100);
+
+				member_num += add(str, member_num);
+			}
+
+			if (strcmp(input_method_, "typing") == 0)
+			{
+				while (true)
+				{
+					strcpy_s(str, "typing");
+					member_num += add(str, member_num);
+
+					cout << "continue inputing? (y/n) >> ";
+
+					char whether_continue[100] = { '\0' };//4 judge_str
+					char whether_continue_[100] = { '\0' };
+					int length = (sizeof(y_n) / sizeof(char)) / (sizeof(y_n[0]) / sizeof(char));
+					judge_str(whether_continue, y_n, length, whether_continue_);
+
+					if (strcmp(whether_continue_, "n") == 0)
+						break;
+				}
+			}
+
+			cout << "\nsuccessfully added\n";
+
+			break;
+		}
+		case 2:
+			void case2_3(int, int);
+			case2_3(member_num, 2);
+			break;
+		case 3:
+			void case2_3(int, int);
+			case2_3(member_num, 3);
+			break;
+		case 4:
+			for (int i = 0; i < member_num; i++)
+			{
+				char num[20];
+				member[i].GetNum(num);
+
+				if (strcmp(num, "\0") != 0)
+				{
+					member[i].Show();
+					cout << endl;
+				}
+			}
+
+			break;
+		case 5:
+			void case5_6(int, int);
+			case5_6(member_num, 5);
+			break;
+		case 6:
+			void case5_6(int, int);
+			case5_6(member_num, 6);
+			break;
+		case 7:
+			double a[100];
+			for (int i = 0; i < member_num; i++)
+				a[i] = member[i].GetNetPayroll();
+
+			for (int i = 0; i < member_num - 1; i++)
+			{
+				int  p = i;
+				for (int j = i + 1; j < member_num; j++)
+					if (a[j] < a[p])
+						p = j;
+				if (p != i)
+				{
+					double t = a[p];
+					a[p] = a[i];
+					a[i] = t;
+				}
+			}
+
+			for (int i = 0; i < member_num; i++)
+			{
+				cout << a[i] << endl;
+			}
+
+			break;
+		case 8:
+			void case8_9(int, int);
+			case8_9(member_num, 8);
+			break;
+		case 9:
+			void case8_9(int, int);
+			case8_9(member_num, 9);
+			break;
+		case 10:
+			return 0;
+		}
+
+		cout << "continue? (y/n) >> ";
+
+		char whether_continue[100] = { '\0' };//5 judge_str
+		char whether_continue_[100] = { '\0' };
+		int length = (sizeof(y_n) / sizeof(char)) / (sizeof(y_n[0]) / sizeof(char));
+		judge_str(whether_continue, y_n, length, whether_continue_);
+
+		if (strcmp(whether_continue_, "n") == 0)
+			return 0;
+	}
+}
+
+int menu()
+{
+	cout << "\t\t\t\t\t   >>>Menu<<<\n";
+	cout << "\t\t\t\t\t1 add a member\n\n";
+	cout << "\t\t\t\t\t2 change a member's info\n\n";
+	cout << "\t\t\t\t\t3 delete a member's info\n\n";
+	cout << "\t\t\t\t\t4 show all the members' info\n\n";
+	cout << "\t\t\t\t\t5 get a member's salary with the num\n\n";
+	cout << "\t\t\t\t\t6 get a member's salary with the name\n\n";
+	cout << "\t\t\t\t\t7 sort the salary\n\n";
+	cout << "\t\t\t\t\t8 calculate the total net payroll\n\n";
+	cout << "\t\t\t\t\t9 calculate the average net payroll\n\n";
+	cout << "\t\t\t\t\t10 exit\n\n";
+	cout << "\ninput the number representing the function you want to use >> ";
+
+	char num[100] = { '\0' };
+	int integer;
+
+	while (true)
+	{
+		cin >> num;
+		char ignore[100] = { '\0' };
+		cin.getline(ignore, 100);
+
+		if (judge_white_space(ignore) == false)//7) judge_white_space
+		{
+			cout << "invalid data! input again >> ";
+			for (int i = 0; i < 100; i++)
+				num[i] = '\0';
+			continue;
+		}
+
+		if (strcmp(num, "0") != 0 &&
+			strcmp(num, "1") != 0 &&
+			strcmp(num, "2") != 0 &&
+			strcmp(num, "3") != 0 &&
+			strcmp(num, "4") != 0 &&
+			strcmp(num, "5") != 0 &&
+			strcmp(num, "6") != 0 &&
+			strcmp(num, "7") != 0 &&
+			strcmp(num, "8") != 0 &&
+			strcmp(num, "9") != 0 &&
+			strcmp(num, "10") != 0)
+			cout << "please input a valid integer! \ninput the number representing the function you want to use >>";
+
+		else if (num[1] != '0')
+		{
+			integer = num[0] - 48;
+			return integer;
+		}
+
+		else
+			return 10;
+	}
+}
+
+bool judge_white_space(char ignore[])
+{
+	for (int i = 0; i < 100; i++)
+		if (ignore[i] != ' ' && ignore[i] != '\0')
+		{
+			return false;
+		}
+	return true;
+}
+
+void judge_str_u(char str[], char str_[])
+{
+	cin.getline(str, 100);
+
+	for (int i = 99; i >= 0; i--)
+		if (str[i] != ' ' && str[i] != '\0')
+		{
+			for (int j = i + 1; j < 100; j++)
+				if (str[j] == ' ')
+					str[j] = '\0';
+			break;
+		}
+
+	for (int i = 0; i < 100; i++)
+		if (str[i] != ' ')
+		{
+			for (int j = i; str[j] != '\0'; j++)
+			{
+				str_[j - i] = str[j];
+			}
+			break;
+		}
+}
+
+void judge_str(char str[], char item[][15], int length, char str_[]) //9 简化函数
+{
+	while (true)
+	{
+		judge_str_u(str, str_);
+
+		for (int i = 0; i < length; i++)
+		{
+			if (strcmp(str_, item[i]) == 0)
+				return;
+		}
+
+		cout << "invalid data! input again >> ";
+
+		for (int i = 0; i < 100; i++)
+		{
+			str[i] = '\0';
+			str_[i] = '\0';
+		}
+	}
+}
+
+double judge_number(char str[])//10 简化函数
+{
+	while (true)
+	{
+		cin >> str;
+		char ignore[100] = { '\0' };
+		cin.getline(ignore, 100);
+
+		if (judge_white_space(ignore) == false)
+		{
+			cout << "invalid data! input again >> ";
+			for (int i = 0; i < 100; i++)
+				str[i] = '\0';
+			continue;
+		}
+
+		char judge_valid_number = '1';
+		for (int i = 0; i < 20; i++)
+		{
+			if (str[i] != '+' &&
+				str[i] != '-' &&
+				str[i] != '.' &&
+				str[i] != 'E' &&
+				str[i] != 'e' &&
+				str[i] != '\0' &&
+				!(str[i] >= 48 && str[i] <= 57))
+			{
+				cout << "invalid data! input again >> ";
+				judge_valid_number = '0';
+				break;
+			}
+
+			if (str[i] == '+' || str[i] == '-')
+				if (i != 0 && str[i - 1] != 'e' && str[i - 1] != 'E')
+				{
+					cout << "invalid data! input again >> ";
+					judge_valid_number = '0';
+					break;
+				}
+
+			if (str[i] == 'E' || str[i] == 'e')
+			{
+				if ((str[i - 1] >= 48 && str[i - 1] <= 57) || str[i - 1] == '.')
+				{
+					if (str[i + 1] != '+' && str[i + 1] != '-' && (str[i + 1] < 48 || str[i + 1] > 57))
+					{
+						cout << "invalid data! input again >> ";
+						judge_valid_number = '0';
+						break;
+					}
+				}
+				else
+				{
+					cout << "invalid data! input again >> ";
+					judge_valid_number = '0';
+					break;
+				}
+			}
+
+			if (str[i] == '.')
+				if (!((str[i - 1] >= 48 && str[i - 1] <= 57) && (str[i + 1] >= 48 && str[i + 1] <= 57)) &&
+					!((str[i - 1] == '+' || str[i - 1] == '-') && (str[i + 1] >= 48 && str[i + 1] <= 57)) &&
+					!((i == 0) && (str[i + 1] >= 48 && str[i + 1] <= 57)) &&
+					!((str[i - 1] >= 48 && str[i - 1] <= 57) && (strlen(str) == 2)) && 
+					!((str[i - 1] >= 48 && str[i - 1] <= 57) && (str[i + 1] == '\0' || str[i + 1] == 'e' || str[i + 1] == 'E')))
+				{
+					cout << "invalid data! input again >> ";
+					judge_valid_number = '0';
+					break;
+				}
+		}
+
+		if (judge_valid_number == '0')
+		{
+			for (int i = 0; i < 100; i++)
+				str[i] = '\0';
+			continue;
+		}
+
+		double number;
+		number = atof(str);
+
+		if (number != 0)
+			return number;
+
+		else if (str[0] - 48 == 0)
+			return number;
+
+		else
+		{
+			cout << "invalid data! input again >> ";
+			for (int i = 0; i < 100; i++)
+				str[i] = '\0';
+		}
+	}
+}
+
+int add(char str[], int total_member_num)
+{
+	int member_num;
+	char ignore_line[100];
+	fstream infile;
+
+	if (strcmp(str, "typing") != 0)
+	{
+		infile.open(str, ios::in);
+
+		while (true)
+		{
+			if (!infile)
+			{
+				cout << "Can not open file: " << endl;
+				cout << "input a correct file name >> ";
+				cin >> str;
+				char ignore[100] = { '\0' };
+				cin.getline(ignore, 100);
+
+				if (judge_white_space(ignore) == false)//8) judge_white_space
+				{
+					for (int i = 0; i < 100; i++)
+						str[i] = '\0';
+					continue;
+				}
+
+				infile.open(str, ios::in);
+			}
+			else
+				break;
+		}
+
+		infile >> member_num;
+
+		infile.ignore();
+		infile.getline(ignore_line, 100);
+	}
+
+	if (strcmp(str, "typing") == 0)
+	{
+		cout << "input the number of member(s) to be input >> ";
+		char member_num_c[100] = { '\0' };
+		member_num = judge_number(member_num_c);
+	}
+
+	int i;
+	for (i = total_member_num; i < member_num + total_member_num; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (strcmp(str, "typing") == 0)
+				cout << "input the " << entry_item[j] << " >> ";
+
+			char item[100] = { '\0' };
+			char item_[100] = { '\0' };
+			if (strcmp(str, "typing") == 0)
+			{
+				if (j != 2)
+					cin.getline(item_, 100);
+				else
+				{
+					int length = (sizeof(entry_item_sex) / sizeof(char)) / (sizeof(entry_item_sex[0]) / sizeof(char)); //6 judge_str
+					judge_str(item, entry_item_sex, length, item_);
+				}
+			}
+
+			else
+				infile.getline(item_, 100);
+
+			member[i].SetChar(j, item_);
+
+		}
+
+		for (int j = 8; j < 10; j++)
+		{
+			if (strcmp(str, "typing") == 0)
+				cout << "input the " << entry_item[j] << " >> ";
+
+			double item_d;
+			if (strcmp(str, "typing") == 0)
+			{
+				char item_c[100] = { '\0' };
+				if (j == 8)
+					member[i].SetTotal(judge_number(item_c));
+				if (j == 9)
+					member[i].SetTax(judge_number(item_c));
+			}
+			else
+			{
+				infile >> item_d;
+				if (j == 8)
+					member[i].SetTotal(item_d);
+				if (j == 9)
+					member[i].SetTax(item_d);
+			}
+		}
+
+		if (strcmp(str, "typing") != 0)
+		{
+			infile.ignore();
+			infile.getline(ignore_line, 100);
+		}
+	}
+
+	if (strcmp(str, "typing") != 0)
+		infile.close();
+
+	return i;
+}
+
+void case2_3(int total_member_num, int case_num)
+{
+	if (case_num == 2)
+		cout << "input the number or name of whom the info is to be changed >> ";
+	else
+		cout << "input the number or name of whom the info is to be deleted >> ";
+
+	char NUM_NAME[100] = { '\0' };
+	char NUM_NAME_[100] = { '\0' };
+	judge_str_u(NUM_NAME, NUM_NAME_);
+
+	for (int i = 0; i <= total_member_num; i++)
+	{
+		char num_name[20];
+
+		member[i].GetNum(num_name);
+		if (strcmp(num_name, NUM_NAME_) == 0)
+		{
+			if (case_num == 2)
+				member[i].Change();
+			else
+				member[i].Delete();
+			break;
+		}
+
+		member[i].GetName(num_name);
+		if (strcmp(num_name, NUM_NAME_) == 0)
+		{
+			if (case_num == 2)
+				member[i].Change();
+			else
+				member[i].Delete();
+			break;
+		}
+
+		if (i == total_member_num)
+			cout << "cannot find a member with such a name or num!\n";
+	}
+}
+
+void case5_6(int total_member_num, int case_num)
+{
+	if (case_num == 5)
+		cout << "input the num of whom the salary is to be checked >> ";
+	else
+		cout << "input the name of whom the salary is to be checked >> ";
+
+	char num_name_c[100] = { '\0' };
+	char num_name_c_[100] = { '\0' };
+	judge_str_u(num_name_c, num_name_c_);
+
+	for (int i = 0; i <= total_member_num; i++)
+	{
+		char num_name[20];
+
+		if (case_num == 5)
+			member[i].GetNum(num_name);
+		else
+			member[i].GetName(num_name);
+
+		if (strcmp(num_name, num_name_c_) == 0)
+		{
+			double total, tax, netpayroll;
+			member[i].GetSalary(total, tax, netpayroll);
+			cout << "total: " << total << '\t'
+				<< "tax: " << tax << '\t'
+				<< "net payroll: " << netpayroll << endl;
+			break;
+		}
+
+		if (i == total_member_num)
+		{
+			if (case_num == 5)
+				cout << "cannot find a member with such a num!\n";
+			else
+				cout << "cannot find a member with such a name!\n";
+		}
+	}
+}
+
+void case8_9(int total_member_num, int case_num)
+{
+	double sum = 0;
+
+	for (int i = 0; i < total_member_num; i++)
+		sum += member[i].GetNetPayroll();
+
+	cout << "the total net payroll is ";
+	if (case_num == 8)
+		cout << sum << endl;
+	else
+		cout << sum / total_member_num << endl;
+}
